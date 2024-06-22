@@ -1,0 +1,346 @@
+<app-header></app-header>
+<main>
+  <section class="banner">
+    <div class="content-left"></div>
+    <div class="content-right">
+      <p>New Arrival</p>
+      <h3>Discover Our New Collection</h3>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus,
+        luctus nec ullamcorper mattis.
+      </p>
+      <button routerLink="/cart">BUY NOW</button>
+    </div>
+  </section>
+  <section class="range">
+    <div class="range-title">
+      <h3>Browse The Range</h3>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </div>
+    <div class="range-infor row">
+      <div class="range-item col-4">
+        <img src="/assets/imgs/range_1.jpg" alt="" />
+        <h4>Dining</h4>
+      </div>
+      <div class="range-item col-4">
+        <img src="/assets/imgs/range_2.jpg" alt="" />
+        <h4>Living</h4>
+      </div>
+      <div class="range-item col-4">
+        <img src="/assets/imgs/range_3.jpg" alt="" />
+        <h4>Bedroom</h4>
+      </div>
+    </div>
+  </section>
+
+  <section class="list_product container">
+    <h3 class="nav-infor_item">
+      Our Products
+      <div class="search">
+        <div class="input-search">
+          <input
+            type="text"
+            [(ngModel)]="keyword"
+            name="keyword"
+            placeholder="Search"
+            (keyup.enter)="searchProduct()"
+          />
+        </div>
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 28 28"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          class="search"
+          (click)="searchProduct()"
+        >
+          <path
+            d="M24.5 24.5L19.2663 19.257M22.1666 12.25C22.1666 14.88 21.1219 17.4024 19.2621 19.2621C17.4024 21.1219 14.88 22.1666 12.25 22.1666C9.61992 22.1666 7.09757 21.1219 5.23784 19.2621C3.3781 17.4024 2.33331 14.88 2.33331 12.25C2.33331 9.61992 3.3781 7.09757 5.23784 5.23784C7.09757 3.3781 9.61992 2.33331 12.25 2.33331C14.88 2.33331 17.4024 3.3781 19.2621 5.23784C21.1219 7.09757 22.1666 9.61992 22.1666 12.25V12.25Z"
+            stroke="black"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+    </h3>
+    <div class="row">
+      <div class="col-lg-3 col-md-6" *ngFor="let product of products">
+        <div class="product" (click)="onProductClick(product.id)">
+          <img
+            id="image"
+            class="product-image"
+            alt=""
+            (mouseover)="hoverImageToImage(product.id)"
+            (mouseout)="hoverOutImage()"
+            [src]="hoveredProductId === product.id ? hoveredImage : product.url"
+          />
+
+          <div
+            class="product-sale"
+            *ngIf="product.product_sale.newProduct === false"
+          >
+            {{ product.product_sale.sale }}%
+          </div>
+          <div
+            class="product-new"
+            *ngIf="product.product_sale.newProduct === true"
+          >
+            New
+          </div>
+          <div class="product-infor">
+            <h6 class="product_name">{{ product.name }}</h6>
+            <div class="product_price d-flex align-item-center gap-3">
+              <b>
+                {{
+                  (
+                    product.price *
+                    ((100 - product.product_sale.sale) / 100)
+                  ).toLocaleString("vi-VN")
+                }}₫</b
+              >
+              <del *ngIf="!product.product_sale.newProduct"
+                >{{ product.price.toLocaleString("vi-VN") }}₫
+              </del>
+            </div>
+
+            <div class="product-rating d-flex justify-content-between mt-1">
+              <div class="product-rating_star d-flex">
+                <div
+                  class="product-rating_star"
+                  *ngFor="let star of getRatingProductId(product.id)"
+                >
+                  <i class="fa-solid fa-star"></i>
+                </div>
+                <span> ({{ getEvaluationProductId(product.id) }})</span>
+              </div>
+              <div class="product-sales">
+                <span style="font-size: 14px"
+                  >Đã bán
+                  {{ formatQuantity(getSoldQuantity(product.id)) }}
+                </span>
+              </div>
+            </div>
+            <div class="color-item">
+              <div
+                class="color"
+                [style.background-color]="product.color.code"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" *ngIf="checkShowMore">
+      <div class="col-lg-3 col-md-6" *ngFor="let product of productShowMore">
+        <div class="product" (click)="onProductClick(product.id)">
+          <img
+            id="image"
+            class="product-image"
+            alt=""
+            (mouseover)="hoverImageToImage(product.id)"
+            (mouseout)="hoverOutImage()"
+            [src]="hoveredProductId === product.id ? hoveredImage : product.url"
+          />
+          <div
+            class="product-sale"
+            *ngIf="product.product_sale.newProduct === false"
+          >
+            {{ product.product_sale.sale }}%
+          </div>
+          <div
+            class="product-new"
+            *ngIf="product.product_sale.newProduct === true"
+          >
+            New
+          </div>
+
+          <div class="product-infor">
+            <h6 class="product_name">{{ product.name }}</h6>
+
+            <span class="product_price">
+              <b
+                >Rp
+                {{
+                  (
+                    product.price *
+                    ((100 - product.product_sale.sale) / 100)
+                  ).toLocaleString("vi-VN")
+                }}₫</b
+              ></span
+            >
+            <del *ngIf="!product.product_sale.newProduct"
+              >Rp {{ product.price.toLocaleString("vi-VN") }}₫
+            </del>
+            <div class="product-rating d-flex justify-content-between mt-1">
+              <div class="product-rating_star d-flex">
+                <div
+                  class="product-rating_star"
+                  *ngFor="let star of getRatingProductId(product.id)"
+                >
+                  <i class="fa-solid fa-star"></i>
+                </div>
+                <span> ({{ getEvaluationProductId(product.id) }})</span>
+              </div>
+              <div class="product-sales">
+                <span style="font-size: 14px"
+                  >Đã bán
+                  {{ formatQuantity(getSoldQuantity(product.id)) }}
+                </span>
+              </div>
+            </div>
+            <div class="color-item">
+              <div
+                class="color"
+                [style.background-color]="product.color.code"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="show-more" (click)="checkShowMoreProducts()">
+      Show more
+    </button>
+  </section>
+  <section class="explore-product">
+    <div class="container explore-product">
+      <div class="explore-left">
+        <h3>50+ Beautiful rooms inspiration</h3>
+        <p>
+          Our designer already made a lot of beautiful prototipe of rooms that
+          inspire you
+        </p>
+        <button class="btn-explore">Explore More</button>
+      </div>
+      <div class="explore-center"></div>
+      <div class="explore-right">
+        <div
+          id="carouselExampleControls"
+          class="carousel slide"
+          data-bs-ride="carousel"
+        >
+          <div class="carousel-indicators">
+            <button
+              type="button"
+              data-bs-target="#carouselExampleIndicators"
+              data-bs-slide-to="0"
+              class="active"
+              aria-current="true"
+              aria-label="Slide 1"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#carouselExampleIndicators"
+              data-bs-slide-to="1"
+              aria-label="Slide 2"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#carouselExampleIndicators"
+              data-bs-slide-to="2"
+              aria-label="Slide 3"
+            ></button>
+          </div>
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img
+                src="/assets/imgs/explore_1.jpg"
+                class="slide-img"
+                alt="..."
+              />
+            </div>
+            <div class="carousel-item">
+              <img
+                src="/assets/imgs/explore_2.jpg"
+                class="slide-img"
+                alt="..."
+              />
+            </div>
+            <div class="carousel-item">
+              <img
+                src="/assets/imgs/explore_1.jpg"
+                class="slide-img"
+                alt="..."
+              />
+            </div>
+          </div>
+          <button
+            class="carousel-control-prev"
+            type="button"
+            data-bs-target="#carouselExampleControls"
+            data-bs-slide="prev"
+          >
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button
+            class="carousel-control-next"
+            type="button"
+            data-bs-target="#carouselExampleControls"
+            data-bs-slide="next"
+          >
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="setup">
+    <div class="container">
+      <p>Share your setup with</p>
+      <h3>#FuniroFurniture</h3>
+      <div class="setup-infor">
+        <div class="setup-left">
+          <div class="row d-flex align-items-end">
+            <div class="setup-item col-1">
+              <img
+                src="/assets/imgs/setup_1.jpg"
+                class=""
+                style="width: 60px"
+                alt=""
+              />
+            </div>
+            <div class="setup-item col-8">
+              <img src="/assets/imgs/setup_2.jpg" alt="" style="width: 270px" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="setup-item col-4">
+              <img src="/assets/imgs/setup_6.jpg" alt="" style="width: 150px" />
+            </div>
+            <div class="setup-item col-5">
+              <img src="/assets/imgs/setup_7.jpg" alt="" style="width: 200px" />
+            </div>
+          </div>
+        </div>
+        <div class="setup-center row">
+          <div class="setup-item col-12">
+            <img src="/assets/imgs/setup_3.jpg" alt="" style="width: 300px" />
+          </div>
+        </div>
+        <div class="setup-right">
+          <div class="row d-flex align-items-end g-5">
+            <div class="setup-item col-3">
+              <img src="/assets/imgs/setup_4.jpg" alt="" style="width: 150px" />
+            </div>
+            <div class="setup-item col-5">
+              <img src="/assets/imgs/setup_5.jpg" alt="" style="width: 200px" />
+            </div>
+          </div>
+          <div class="row g-5">
+            <div class="setup-item col-3">
+              <img src="/assets/imgs/setup_8.jpg" alt="" style="width: 150px" />
+            </div>
+            <div class="setup-item col-5">
+              <img src="/assets/imgs/setup_9.jpg" alt="" style="width: 200px" />
+            </div>
+            <div class="setup-item col-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<app-footer></app-footer>

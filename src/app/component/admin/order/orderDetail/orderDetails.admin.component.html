@@ -1,0 +1,49 @@
+<div class="container-fluid">
+  <h3>OrderDetails</h3>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Order_ID</th>
+      <th>Product_ID</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>Total Money</th>
+      <th></th>
+    </tr>
+    <tr *ngFor="let orderDetail of orderDetails">
+      <td>{{ orderDetail.id }}</td>
+      <td>{{ orderDetail.order_id }}</td>
+      <td>{{ orderDetail.product_id }}</td>
+      <td>{{ orderDetail.number_of_products }}</td>
+      <td>{{ orderDetail.price }}</td>
+      <td>{{ orderDetail.total_money }}</td>
+      <td>
+        <div class="dropdown">
+          <button
+            class="btn btn-primary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Action
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a
+                class="dropdown-item"
+                data-bs-toggle="modal"
+                data-bs-target="#exampleModal"
+                >Update</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" (click)="onRemove(orderDetail.id)"
+                >Remove</a
+              >
+            </li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>

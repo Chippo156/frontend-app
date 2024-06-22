@@ -1,0 +1,305 @@
+<main class="container">
+  <div class="checkout d-flex">
+    <div class="checkout-left">
+      <div class="checkout-title">
+        <h5>Nội thất Furniro</h5>
+        <span>
+          <a routerLink="/cart">Giỏ hàng</a>
+          > Thông tin giao hàng
+        </span>
+      </div>
+      <div class="checkout-infor">
+        <h6>Thông tin giao hàng</h6>
+        <span *ngIf="!checkLogin"
+          >Qúy khách đã có tài khoản ?
+          <a routerLink="/login">Đăng nhập</a></span
+        >
+
+        <form action="" [formGroup]="orderForm">
+          <div class="form-group my-3">
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              placeholder="Họ và tên"
+              [(ngModel)]="userName"
+              formControlName="userName"
+              name="userName"
+              [class.is-invalid]="
+                orderForm.get('userName')!.invalid &&
+                orderForm.get('userName')!.touched
+              "
+              class="form-control"
+              id="name"
+              required
+            />
+            <div
+              *ngIf="
+                orderForm.get('userName')!.invalid &&
+                orderForm.get('userName')!.touched
+              "
+              class="invalid-feedback"
+            >
+              Vui lòng nhập họ và tên
+            </div>
+          </div>
+
+          <div class="form-group my-3 d-flex align-item-center">
+            <div class="w-50" style="margin-right: 10px">
+              <input
+                type="text"
+                class="form-control"
+                id="phone"
+                placeholder="Số điện thoại"
+                [(ngModel)]="phoneNumber"
+                formControlName="phoneNumber"
+                name="phoneNumber"
+                [class.is-invalid]="
+                  orderForm.get('phoneNumber')!.invalid &&
+                  orderForm.get('phoneNumber')!.touched
+                "
+                class="form-control"
+                id="name"
+                required
+              />
+              <div
+                *ngIf="
+                  orderForm.get('phoneNumber')!.invalid &&
+                  orderForm.get('phoneNumber')!.touched
+                "
+                class="invalid-feedback"
+              >
+                Vui lòng nhập số điện thoại(6 ký số)
+              </div>
+            </div>
+            <div class="w-50">
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                placeholder="Nhập email"
+                [(ngModel)]="email"
+                formControlName="email"
+                name="email"
+                [class.is-invalid]="
+                  orderForm.get('email')!.invalid &&
+                  orderForm.get('email')!.touched
+                "
+                class="form-control"
+                id="name"
+                required
+              />
+              <div
+                *ngIf="
+                  orderForm.get('email')!.invalid &&
+                  orderForm.get('email')!.touched
+                "
+                class="invalid-feedback"
+              >
+                Không đúng định dạng
+              </div>
+            </div>
+          </div>
+          <div class="form-group my-3">
+            <input
+              type="text"
+              class="form-control"
+              id="address"
+              placeholder="Địa chỉ"
+              [(ngModel)]="address"
+              formControlName="address"
+              name="address"
+              [class.is-invalid]="
+                orderForm.get('address')!.invalid &&
+                orderForm.get('address')!.touched
+              "
+              class="form-control"
+              required
+            />
+            <div
+              *ngIf="
+                orderForm.get('address')!.invalid &&
+                orderForm.get('address')!.touched
+              "
+              class="invalid-feedback"
+            >
+              Địa chỉ ít nhất 5 ký tự
+            </div>
+          </div>
+          <div class="form-group my-3 d-flex gap-3 align-item-center">
+            <select name="" id="" class="form-control">
+              <option value="">Chọn tỉnh/thành phố</option>
+            </select>
+            <select name="" id="" class="form-control">
+              <option value="">Chọn quận/huyện</option>
+            </select>
+            <select name="" id="" class="form-control">
+              <option value="">Chọn phường/xã</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="shipping-method">
+        <h6>Phương thức vận chuyển</h6>
+        <div class="shipping-method_form d-flex">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="shipping"
+            id="shipping1"
+            value="Giao trực tiếp"
+            checked
+          />
+          <label class="form-check-label" for="shipping1">
+            Miễn phí giao hàng & lắp đặt tại tất cả quận huyện thuộc TP.HCM đối
+            với các sản phẩm nội thất. Các sản phẩm thuộc danh mục Đồ Trang Trí,
+            phí giao hàng sẽ được Furniro liên hệ báo sau.
+          </label>
+          <span>0đ</span>
+        </div>
+      </div>
+      <div class="">
+        <h6>Phương thức thanh toán</h6>
+        <div class="payment-method">
+          <div class="form d-flex gap-3">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="payment"
+              id="payment1"
+              value="Thanh toán tiền mặt"
+              checked
+            />
+            <img src="../../../assets/imgs/cod.svg" alt="" width="50" />
+            <label class="form-check-label" for="payment1">
+              Thanh toán tiền mặt khi giao hàng (COD)
+            </label>
+          </div>
+          <div class="form d-flex gap-3">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="payment"
+              id="payment1"
+              value="Thanh toán chuyển khoản qua ngân hàng"
+              checked
+            />
+            <img src="../../../assets/imgs/other.svg" alt="" width="50" />
+            <label class="form-check-label" for="payment1">
+              Thanh toán chuyển khoản qua ngân hàng
+            </label>
+          </div>
+          <div class="form d-flex gap-3 align-item-center">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="payment"
+              id="payment1"
+              value="POS"
+              checked
+            />
+            <img src="../../../assets/imgs/other.svg" alt="" width="50" />
+            <label class="form-check-label" for="payment1">
+              Thanh toán quẹt thẻ khi giao hàng (POS)
+            </label>
+          </div>
+          <div class="form d-flex gap-3">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="payment"
+              id="payment1"
+              value="Thanh toán online qua cổng VNPay"
+              checked
+            />
+            <img src="../../../assets/imgs/vnpay_new.svg" alt="" width="50" />
+            <label class="form-check-label" for="payment1">
+              Thanh toán online qua cổng VNPay (ATM/Visa/MasterCard/JCB/QR Pay
+              trên Internet Banking)
+              <img
+                class="d-block"
+                src="../../../assets/imgs/atm_visa_master_jcb.svg"
+                alt=""
+                width="120"
+              />
+            </label>
+          </div>
+
+          <div class="form d-flex gap-3">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="payment"
+              id="payment1"
+              value="Thanh toán online qua cổng MoMo"
+              checked
+            />
+            <img src="../../../assets/imgs/momo.svg" alt="" width="50" />
+            <label class="form-check-label" for="payment1"> Ví MoMo </label>
+          </div>
+        </div>
+        <div
+          class="checkout-btn d-flex justify-content-between align-items-center my-5"
+        >
+          <a routerLink="/cart"> Giỏ hàng</a>
+          <button class="btn btn-primary" (click)="placeOrder()">
+            Hoàn tất đơn hàng
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="checkout-right">
+      <div class="cart-product">
+        <div
+          class="product d-flex gap-5 m-4 align-items-center"
+          *ngFor="let item of cartItems"
+        >
+          <div class="product-img">
+            <img [src]="item.product.url" alt="" width="70" />
+            <div class="product-quantity">
+              <span>{{ item.quantity }}</span>
+            </div>
+          </div>
+          <div class="product-infor">
+            <h6>{{ item.product.name }}</h6>
+            <div class="product-detail">
+              <span>{{ item.product.color.color }}</span>
+              <span>/</span>
+              <span>{{ item.size }}</span>
+            </div>
+          </div>
+          <div class="product-price">
+            <span>{{ item.product.price.toLocaleString("vi-VN") }}đ</span>
+          </div>
+        </div>
+        <div class="discount d-flex gap-3 m-4">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Mã giảm giá"
+            [(ngModel)]="couponCode"
+          />
+          <button class="btn btn-primary" (click)="CalculateCoupon()">
+            Sử dụng
+          </button>
+        </div>
+        <div class="cart-total m-4">
+          <div class="cart-total-item">
+            <span>Tạm tính</span>
+            <span>{{ totalMoney.toLocaleString("vi-VN") }}đ</span>
+          </div>
+          <div class="cart-total-item">
+            <span>Phí vận chuyển</span>
+            <span>Miễn phí</span>
+          </div>
+        </div>
+        <div class="cart-total m-4">
+          <div class="cart-total-item">
+            <span>Tổng cộng</span>
+            <span>{{ totalMoney.toLocaleString("vi-VN") }}đ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

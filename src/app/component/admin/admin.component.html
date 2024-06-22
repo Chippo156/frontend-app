@@ -1,0 +1,39 @@
+<div class="container-fluid">
+  <header class="header bg-success text-white d-flex justify-content-between">
+    <h1 class="header-title">Dashboard Header</h1>
+    <button class="btn btn-danger btn-sm" (click)="logout()">Logout</button>
+  </header>
+  <div class="row bg-light">
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      <div class="position-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" (click)="showDashBoard('orders')">
+              <i class="fa-brands fa-first-order"></i> Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" (click)="showDashBoard('categories')">
+              <i class="fa-brands fa-canadian-maple-leaf"></i> Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" (click)="showDashBoard('products')">
+              <i class="fa-brands fa-codepen"></i> Products
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="col-md-10 col-lg-10">
+      <ng-container [ngSwitch]="adminComponent">
+        <app-order-admin *ngSwitchCase="'orders'"></app-order-admin>
+        <app-category-admin *ngSwitchCase="'categories'"></app-category-admin>
+        <app-admin-product *ngSwitchCase="'products'"> </app-admin-product>
+        <app-order-details-admin
+          *ngSwitchCase="'orderDetails'"
+        ></app-order-details-admin>
+      </ng-container>
+    </div>
+  </div>
+</div>
