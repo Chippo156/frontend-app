@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { OrderDTO } from '../dtos/orderDto';
 import { UserService } from './user.service';
+import { OrderResponse } from '../responses/orderResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -36,5 +37,40 @@ export class OrderService {
   }
   countQuantityProductInOrder(): Observable<any> {
     return this.http.get(`${this.apiOrderDetailBase}/countQuantity`);
+  }
+  getOrdersByUserId(userId: number): Observable<any> {
+    return this.http.get(`${this.apiOrderBase}/user/${userId}`);
+  }
+  getOrderById(id: number): Observable<any> {
+    return this.http.get(`${this.apiOrderBase}/${id}`);
+  }
+  updateOrder(id: number, order: OrderResponse): Observable<any> {
+    const orderDTO: OrderDTO = {
+      user_id: order.user_id,
+      full_name: order.full_name,
+      phone_number: order.phone_number,
+      email: order.email,
+      address: order.address,
+      note: order.note,
+      order_status: order.status,
+      total_money: order.total_money,
+      shipping_method: order.shipping_method,
+      payment_method: order.payment_method,
+      shipping_address: order.shipping_address,
+      tracking_number: order.tracking_number,
+      cart_items: order.order_details.map((item) => {
+        return {
+          product_id: item.product.id,
+          quantity: item.number_of_products,
+        };
+      }),
+    };
+    return this.http.put(`${this.apiOrderBase}/${id}`, orderDTO);
+  }
+  getProductByOrderId(orderId: number): Observable<any> {
+    return this.http.get(`${this.apiOrderBase}/products/${orderId}`);
+  }
+  getOrderCancceled(userId: number): Observable<any> {
+    return this.http.get(`${this.apiOrderBase}/cancelled/${userId}`);
   }
 }

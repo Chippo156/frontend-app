@@ -4,6 +4,9 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../service/user.service';
 import { RegisterDto } from '../../dtos/registerDto';
+import { AlertComponent } from 'src/app/alert/alert.component';
+import { AlertService } from 'src/app/service/alert.service';
+import { AuthService } from 'src/app/service/auth.service';
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -19,7 +22,12 @@ export class RegisterComponent {
   address: string;
   date_of_birth: Date;
 
-  constructor(private router: Router, private userSerrvice: UserService) {
+  constructor(
+    private router: Router,
+    private userSerrvice: UserService,
+    private alertService: AlertService,
+    private authService: AuthService
+  ) {
     this.phoneNumber = '';
     this.password = '';
     this.password_confirm = '';
@@ -44,11 +52,12 @@ export class RegisterComponent {
     };
     this.userSerrvice.register(registerDto).subscribe({
       next: (response: any) => {
-        if (response !== null && response.Status === 200) {
+        if (response) {
           alert('Register success');
           this.router.navigate(['/login']);
         } else {
           console.log('Register failed');
+          this.alertService.showAlert('Error', 'Register failed');
         }
       },
       complete: () => {
@@ -56,6 +65,7 @@ export class RegisterComponent {
       },
       error: (error) => {
         console.log(error);
+        this.alertService.showAlert('Error', error.error);
       },
     });
   }
@@ -85,5 +95,14 @@ export class RegisterComponent {
     } else {
       this.registerForm.form.controls['date_of_birth'].setErrors(null);
     }
+  }
+  redirectToGoogleOAuth() {
+    debugger;
+    this.authService.googleOAuth('');
+  }
+
+  redirectToGithubOAuth() {
+    debugger;
+    this.authService.githubOAuth();
   }
 }

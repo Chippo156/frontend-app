@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, Injectable, OnInit } from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  Component,
+  Injectable,
+  OnInit,
+  Renderer2,
+} from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -20,19 +27,21 @@ import { Comment } from '../../models/comment';
 import { OrderService } from '../../service/order.service';
 import { SoldProduct } from '../../responses/SoldProduct';
 import { ProductImage } from '../../models/product.image';
+import { CategoryService } from 'src/app/service/category.service';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 @Injectable()
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit, AfterViewChecked {
   products: Product[] = [];
+  temp: Product[] = [];
   productImage!: Product;
   productShowMore: Product[] = [];
   categories: Category[] = [];
   currentPage: number = 0;
-  itemsPerPage: number = 8;
+  itemsPerPage: number = 12;
   pages: number[] = [];
   totalPages: number = 0;
   visiblePages: number[] = [];
@@ -45,16 +54,41 @@ export class HomeComponent implements OnInit {
   comments: number = 0;
   listRating: Map<number, number> = new Map<number, number>();
   listComment: Map<number, number> = new Map<number, number>();
+  checkLoad: boolean = false;
+  product_favorite: Set<number> = new Set<number>();
+  viewChecked: boolean = false;
+  valueCategoryCheck: string = 'All categories';
+
   constructor(
     private router: Router,
     private productService: ProductService,
     private paymentService: PaymentService,
     private route: ActivatedRoute,
     private commentService: CommmentService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private renderer: Renderer2,
+    private categoryService: CategoryService
   ) {
-    this.selectedCategoryId = 0;
     this.keyword = '';
+  }
+  ngAfterViewChecked(): void {
+    if (!this.viewChecked) {
+      this.viewFavorite();
+      this.viewChecked = true;
+    }
+  }
+  ngAfterViewInit(): void {
+    debugger;
+    const productFavoriteData = JSON.parse(
+      localStorage.getItem('product_favorite')!
+    );
+    if (Array.isArray(productFavoriteData)) {
+      this.product_favorite = new Set<number>(productFavoriteData);
+      console.log(this.product_favorite);
+    } else {
+      this.product_favorite = new Set<number>();
+      console.log(this.product_favorite);
+    }
   }
 
   ngOnInit(): void {
@@ -66,6 +100,7 @@ export class HomeComponent implements OnInit {
       this.currentPage,
       this.itemsPerPage
     );
+    this.getAllCategory();
     this.route.queryParams.subscribe((params) => {
       const paymentStatus = params['paymentStatus'];
       if (paymentStatus === '00') {
@@ -115,9 +150,10 @@ export class HomeComponent implements OnInit {
                 endDate: new Date(),
               };
             }
-            this.comments = response.comments;
           });
           this.products = response.productResponses;
+          this.temp = response.productResponses;
+          this.checkLoad = true;
           this.totalPages = response.totalPages;
         },
         complete: () => {
@@ -132,6 +168,7 @@ export class HomeComponent implements OnInit {
       });
   }
   checkShowMoreProducts() {
+    this.checkLoad = false;
     ++this.currentPage;
     this.getProducts(
       this.keyword,
@@ -228,5 +265,94 @@ export class HomeComponent implements OnInit {
         console.log(error);
       },
     });
+  }
+  checkLoader(): boolean {
+    if (this.products.length > 0) {
+      return true;
+    }
+    return false;
+  }
+  checkShowMoreLoader(): boolean {
+    if (this.productShowMore.length > 0) {
+      return true;
+    }
+    if (this.products.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  addFavorite(productId: number) {
+    this.product_favorite.add(productId);
+    localStorage.setItem(
+      'product_favorite',
+      JSON.stringify(Array.from(this.product_favorite))
+    );
+    const heartElement = document.getElementById('heart' + productId);
+    if (heartElement) {
+      heartElement.setAttribute('style', 'color: red');
+    } else {
+      console.log('Element not found');
+    }
+  }
+  addAndRemoveFavorite(id: number) {
+    let flag = false;
+    this.product_favorite.forEach((productId) => {
+      const heartElement = this.renderer.selectRootElement(
+        '#heart' + productId,
+        true
+      );
+      if (heartElement && id === productId) {
+        flag = true;
+        this.renderer.setStyle(heartElement, 'color', '#cabffd');
+        this.product_favorite.delete(productId);
+        localStorage.setItem(
+          'product_favorite',
+          JSON.stringify(Array.from(this.product_favorite))
+        );
+        return;
+      } else {
+        console.log('Elememt not found');
+      }
+    });
+    if (flag == false) {
+      this.addFavorite(id);
+    }
+  }
+  viewFavorite() {
+    this.product_favorite.forEach((productId) => {
+      const heartElement = this.renderer.selectRootElement(
+        '#heart' + productId,
+        true
+      );
+      if (heartElement) {
+        this.renderer.setStyle(heartElement, 'color', 'red');
+      } else {
+        console.log('Element not found');
+      }
+    });
+  }
+  getAllCategory() {
+    this.categoryService.getAllCategories('', 0, 10).subscribe({
+      next: (response: any) => {
+        debugger;
+        this.categories = response.categories;
+      },
+      complete: () => {},
+      error: (error) => {
+        debugger;
+        console.log(error);
+      },
+    });
+  }
+  searchProductByCategory(categoryId: number, categoryName: string) {
+    this.valueCategoryCheck = categoryName;
+    this.selectedCategoryId = categoryId;
+    this.getProducts(
+      this.keyword,
+      this.selectedCategoryId,
+      this.currentPage,
+      this.itemsPerPage
+    );
   }
 }

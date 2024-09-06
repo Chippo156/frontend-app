@@ -2,6 +2,8 @@ import { Component, ViewChild } from '@angular/core';
 import { CategoryService } from '../../../service/category.service';
 import { Category } from '../../../models/category';
 import { CategoryDTO } from '../../../dtos/categoryDto';
+import { ActivatedRoute, Router } from '@angular/router';
+import { initFlowbite } from 'flowbite';
 
 @Component({
   selector: 'app-category-admin',
@@ -15,22 +17,28 @@ export class CategoryAdminComponent {
   totalPages: number = 0;
   visiblePages: number[] = [];
   keyword: string = '';
-
   selectedAction: string = '';
   onModal = false;
   category!: CategoryDTO;
   categoryId: number = 0;
   categoryName: string = '';
-  constructor(private categoryService: CategoryService) {}
+  constructor(
+    private categoryService: CategoryService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
   ngOnInit(): void {
+    initFlowbite();
     debugger;
     window.scrollTo(0, 0);
     this.getAllCategories(this.keyword, this.currentPage, this.itemsPerPage);
   }
 
   getAllCategories(keyword: string, page: number, limit: number) {
+    debugger;
     this.categoryService.getAllCategories(keyword, page, limit).subscribe({
       next: (response: any) => {
+        debugger;
         this.categories = response.categories;
         this.totalPages = response.totalPage;
         this.visiblePages = this.generateVisiblePages(
@@ -70,6 +78,7 @@ export class CategoryAdminComponent {
       this.currentPage - 1,
       this.itemsPerPage
     );
+    localStorage.setItem('currentCategoryAdminPage', String(this.currentPage));
   }
 
   CreateCategory(categoryDto: CategoryDTO) {
@@ -122,20 +131,28 @@ export class CategoryAdminComponent {
     this.categoryService.deleteCategory(categoryId).subscribe({
       next: (response) => {
         alert(response.message);
-        debugger;
-      },
-      complete: () => {
-        debugger;
         this.getAllCategories(
           this.keyword,
           this.currentPage,
           this.itemsPerPage
         );
+        // this.router.navigate(['../'], { relativeTo: this.route });
+        debugger;
+      },
+      complete: () => {
+        debugger;
       },
       error: (error) => {
         debugger;
         console.log(error);
       },
     });
+  }
+  searchCategory() {
+    this.getAllCategories(this.keyword, this.currentPage, this.itemsPerPage);
+  }
+  dropdownToggle() {
+    const dropdown = document.getElementById('dropdown');
+    dropdown?.classList.toggle('show');
   }
 }

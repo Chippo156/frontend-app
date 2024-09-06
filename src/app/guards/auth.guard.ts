@@ -19,6 +19,7 @@ export class AuthGuard {
     if (!isTokenExpired && isUserIdValid) {
       return true;
     } else {
+      alert('Please login to continue');
       this.router.navigate(['/login']);
       return false;
     }

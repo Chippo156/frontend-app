@@ -6,6 +6,10 @@ import { LoginResponse } from '../../responses/LoginResponse';
 import { TokenService } from '../../service/token.service';
 import { NgForm } from '@angular/forms';
 import { UserResponse } from '../../responses/userResponse';
+import { initFlowbite } from 'flowbite';
+import { AlertService } from 'src/app/service/alert.service';
+import { OAuthService } from 'angular-oauth2-oidc';
+import { AuthService } from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -23,7 +27,10 @@ export class LoginComponent {
     private userService: UserService,
     private tokenService: TokenService,
     private router: Router,
-    private activeRoute: ActivatedRoute
+    private activeRoute: ActivatedRoute,
+    private alertService: AlertService,
+    private oauthService: OAuthService,
+    private authService: AuthService
   ) {
     this.phone_number = '';
     this.password = '';
@@ -65,7 +72,7 @@ export class LoginComponent {
           },
           error: (error) => {
             debugger;
-            console.log(error);
+            this.alertService.showAlert('error', error.error);
           },
         });
       },
@@ -74,8 +81,20 @@ export class LoginComponent {
       },
       error: (error) => {
         debugger;
-        console.log(error);
+        this.alertService.showAlert('error', error.error);
       },
     });
+  }
+  redirectToGoogleOAuth() {
+    debugger;
+    this.authService.googleOAuth('');
+  }
+  redirectToFacebookOAuth() {
+    debugger;
+    this.authService.facebookOAuth('');
+  }
+  redirectToGithubOAuth() {
+    debugger;
+    this.authService.githubOAuth();
   }
 }

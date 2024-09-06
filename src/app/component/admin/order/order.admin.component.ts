@@ -13,7 +13,6 @@ import { Router } from '@angular/router';
   styleUrls: ['./order.admin.component.scss'],
 })
 export class OrderAdminComponent {
-  @Output() viewDetailEvent = new EventEmitter<void>();
   orders: OrderResponse[] = [];
 
   currentPage: number = 0;
@@ -33,7 +32,12 @@ export class OrderAdminComponent {
   getOrders(keyword: string, page: number, limit: number) {
     this.orderService.getAllOrders(keyword, page, limit).subscribe({
       next: (response: any) => {
+        response.orders.forEach((order: OrderResponse) => {
+          order.order_date = new Date(order.order_date);
+          order.shipping_date = new Date(order.shipping_date);
+        });
         this.orders = response.orders;
+
         this.totalPages = response.totalPage;
         this.visiblePages = this.generateVisiblePages(
           this.currentPage,
@@ -64,19 +68,17 @@ export class OrderAdminComponent {
   }
   onPageChange(page: number) {
     debugger;
-    window.scrollTo(0, 0);
-    this.currentPage = page;
-    this.getOrders(this.keyword, this.currentPage - 1, this.itemsPerPage);
-    const element = document.getElementById('select') as HTMLSelectElement;
-    element.value = '0';
+    this.currentPage = page < 0 ? 0 : page;
+    localStorage.setItem('currentOrderAdminPage', String(this.currentPage));
+    this.getOrders(this.keyword, this.currentPage, this.itemsPerPage);
   }
   getOrderDetails(orderId: number) {
     this.router.navigate(['/admin/order-details', orderId]);
   }
 
-  viewDetails() {
+  viewDetails(order: OrderResponse) {
     debugger;
-    this.viewDetailEvent.emit();
+    this.router.navigate(['/admin/orders', order.id]);
   }
   onRemove(orderId: number) {
     this.orderService.deleteOrder(orderId).subscribe({

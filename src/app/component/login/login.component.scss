@@ -75,5 +75,20 @@
   color: white;
   border: transparent;
   border-radius: 10px;
-  margin-top: 20px;
+  margin-top: 10px;
+}
+.login-with {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #000;
+  cursor: pointer;
+  width: 150px;
+  justify-content: center;
+}
+.login-with > img {
+  width: 30px;
 }

@@ -3,6 +3,7 @@ import { Product } from '../../../models/product';
 import { Router } from '@angular/router';
 import { ProductService } from '../../../service/product.service';
 import { environtment } from '../../../environments/environment';
+import { timestamp } from 'rxjs';
 
 @Component({
   selector: 'app-admin-product',
@@ -12,14 +13,20 @@ import { environtment } from '../../../environments/environment';
 export class ProductAdminComponent implements OnInit {
   products: Product[] = [];
   currentPage: number = 0;
-  itemsPerPage: number = 16;
+  itemsPerPage: number = 15;
   totalPages: number = 0;
   visiblePages: number[] = [];
   keyword: string = '';
   selectedCategoryId: number = 0;
 
+  productName: string = '';
+  price: number = 0;
+  description: string = '';
+  size: string = '';
+  color: string = '';
+
   constructor(private router: Router, private productService: ProductService) {
-    this.selectedCategoryId = 2;
+    this.selectedCategoryId = 0;
     this.keyword = '';
   }
 
@@ -67,6 +74,8 @@ export class ProductAdminComponent implements OnInit {
                 endDate: new Date(),
               };
             }
+            product.created_at = new Date(product.created_at);
+
             let formattedNumber = product.price.toLocaleString('vi-VN');
             product.price = parseFloat(formattedNumber);
           });
@@ -98,4 +107,18 @@ export class ProductAdminComponent implements OnInit {
       .fill(0)
       .map((_, index) => startPage + index);
   }
+  viewDetails(product: Product) {
+    debugger;
+    this.router.navigate(['/admin/products', product.id]);
+  }
+  searchProduct() {
+    this.getProducts(
+      this.keyword,
+      this.selectedCategoryId,
+      this.currentPage,
+      this.itemsPerPage
+    );
+  }
+  addProduct() {}
+  deleteProduct(productId: number) {}
 }

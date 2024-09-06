@@ -119,7 +119,13 @@ export class CartService {
     const cartSize = cartSize1Data.get(productId);
     if (cartSize) {
       cartSize.delete(size);
-      this.cartSize1.set(productId, cartSize);
+      if (cartSize.size === 0) {
+        this.cart.delete(productId);
+        this.cartSize.delete(productId);
+        this.cartSize1.delete(productId);
+      } else {
+        this.cartSize1.set(productId, cartSize);
+      }
     }
     this.saveCartToLocalStorage();
   }

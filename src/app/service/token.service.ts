@@ -19,7 +19,9 @@ export class TokenService {
     localStorage.removeItem(this.TOKEN_KEY);
   }
   getUserIdByToken() {
+    debugger;
     let userObject = this.jwtHelper.decodeToken(this.getToken() ?? '');
+    if (userObject === null) return 0;
     return 'userId' in userObject ? parseInt(userObject['userId']) : 0;
   }
   isTokenExpired(): boolean {

@@ -20,6 +20,7 @@ import { CommmentService } from '../../service/comment.service';
 import { OrderService } from '../../service/order.service';
 import { SoldProduct } from '../../responses/SoldProduct';
 import { ProductImage } from '../../models/product.image';
+import { CategoryService } from 'src/app/service/category.service';
 
 @Component({
   selector: 'app-product',
@@ -28,12 +29,13 @@ import { ProductImage } from '../../models/product.image';
 })
 export class ProductComponent implements OnInit {
   products: Product[] = [];
+  temp: Set<Product> = new Set<Product>();
   productsSort: Product[] = [];
   productsFilter: Product[] = [];
   totalPageFilter: number = 0;
   categories: Category[] = [];
   currentPage: number = 0;
-  itemsPerPage: number = 8;
+  itemsPerPage: number = 16;
   totalPages: number = 0;
   visiblePages: number[] = [];
   keyword: string = '';
@@ -43,13 +45,18 @@ export class ProductComponent implements OnInit {
   listComment: Map<number, number> = new Map<number, number>();
   hoveredProductId: number | null = null;
   hoveredImage: string | null = null;
-  colors: string[] = [];
+  productColor: Product[] = [];
   checkColor: string = '';
+  checkLoad: boolean = false;
+  colors: Set<string> = new Set();
+  selectedCheckboxes: Set<number> = new Set();
+
   constructor(
     private router: Router,
     private productService: ProductService,
     private commentService: CommmentService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private categoryService: CategoryService
   ) {
     this.selectedCategoryId = 0;
     this.keyword = '';
@@ -66,8 +73,10 @@ export class ProductComponent implements OnInit {
     );
     this.getCountQuantityProduct();
     // this.getColors();
+    this.getAllCategory();
   }
   onPageChange(page: number) {
+    this.checkLoad = false;
     debugger;
     window.scrollTo(0, 0);
     this.currentPage = page;
@@ -101,7 +110,7 @@ export class ProductComponent implements OnInit {
               }
               flag++;
             });
-
+            this.colors.add(product.code_color);
             if (product.product_sale === null) {
               product.product_sale = {
                 id: 0,
@@ -114,6 +123,8 @@ export class ProductComponent implements OnInit {
             }
           });
           this.products = response.productResponses;
+
+          this.checkLoad = true;
           this.totalPages = response.totalPage;
           this.totalPageFilter = this.totalPages;
           this.productsFilter = this.products;
@@ -383,25 +394,12 @@ export class ProductComponent implements OnInit {
       this.products = this.productsFilter;
     }
   }
-  getColors() {
-    this.productService.getCodeColors().subscribe({
-      next: (response: any) => {
-        debugger;
-        this.colors = response;
-      },
-      complete: () => {
-        debugger;
-      },
-      error: (error) => {
-        console.log(error);
-      },
-    });
-  }
+
   filterProductByColor(color: string) {
     this.products = this.productsFilter;
     let productColor: Product[] = [];
     this.products.forEach((product) => {
-      if (product.color.code === color) {
+      if (product.code_color === color) {
         productColor.push(product);
       }
     });
@@ -409,5 +407,46 @@ export class ProductComponent implements OnInit {
     if (productColor.length === 0) {
       this.products = this.productsFilter;
     }
+  }
+  addFavorite(productId: number) {
+    const heart = document.querySelector('.fa-heart');
+    heart?.classList.add('addFavorite');
+  }
+  getAllCategory() {
+    this.categoryService.getAllCategories('', 0, 10).subscribe({
+      next: (response: any) => {
+        debugger;
+        this.categories = response.categories;
+      },
+      complete: () => {},
+      error: (error) => {
+        debugger;
+        console.log(error);
+      },
+    });
+  }
+  searchProductByCategory(categoryId: number, categoryName: string) {
+    debugger;
+    this.selectedCategoryId = categoryId;
+    this.getProducts(
+      this.keyword,
+      this.selectedCategoryId,
+      this.currentPage,
+      this.itemsPerPage
+    );
+  }
+  onCheckboxChange(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    const value = parseInt(checkbox.value, 10);
+    if (checkbox.checked) {
+      this.selectedCheckboxes.add(value);
+    } else {
+      this.selectedCheckboxes.delete(value);
+    }
+  }
+  reset() {
+    this.products = this.productsFilter;
+    this.selectedCheckboxes.clear();
+    this.checkColor = '';
   }
 }

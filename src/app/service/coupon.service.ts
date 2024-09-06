@@ -10,8 +10,8 @@ export class CouponService {
   private apiCouponBase = `${environtment.apiBaseUrl}/coupons`;
   constructor(private http: HttpClient) {}
 
-  getCoupon() {
-    return 'coupon';
+  getCoupon(): Observable<any> {
+    return this.http.get(`${this.apiCouponBase}`);
   }
   getCouponByCode(code: string): Observable<any> {
     return this.http.get(`${this.apiCouponBase}/code/${code}`);

@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnInit,
@@ -28,6 +29,9 @@ import { style } from '@angular/animations';
 import { CommentImage } from '../../models/comment.image';
 import { Comment } from '../../models/comment';
 import { Size } from '../../models/sizes';
+import { CommentDTO } from 'src/app/dtos/commentDto';
+import { UserService } from 'src/app/service/user.service';
+import * as THREE from 'three';
 
 @Component({
   selector: 'app-product-details',
@@ -41,8 +45,10 @@ export class ProductDetailsComponent implements OnInit {
     private router: ActivatedRoute,
     private route: Router,
     private orderService: OrderService,
-    private commentService: CommmentService
+    private commentService: CommmentService,
+    private userService: UserService
   ) {}
+  @ViewChild('container') containerRef!: ElementRef;
   productCheckColor: Product[] = [];
   checkShowMore: boolean = false;
   product!: Product;
@@ -63,14 +69,24 @@ export class ProductDetailsComponent implements OnInit {
   priceSize: number = 0;
   selectedSize: string = '';
   selectedColor: string = '';
-  colors: Color[] = [];
-  checkInfor: string = 'des';
+  colors: string[] = [];
+  checkInfor: string = 'review';
   sizes: Size[] = [];
   comments: Comment[] = [];
+  checkLoad: boolean = false;
+  commentContent: string = '';
+  commentRating: number = 0;
+  commentImages: File[] = [];
+  user_id: number | undefined;
+
+  @Output() imageUrl = new EventEmitter<string>();
   ngOnInit() {
     debugger;
+    this.user_id = this.userService.getUserResponseFromLocalStorage()?.id;
     window.scrollTo(0, 0);
     this.getProductDetails(0);
+    console.log(this.product);
+
     this.getCountQuantityProduct();
   }
   getProductDetails(id: number) {
@@ -102,7 +118,6 @@ export class ProductDetailsComponent implements OnInit {
             };
           }
           debugger;
-
           this.product = response;
           this.showImage(0);
         },
@@ -110,8 +125,9 @@ export class ProductDetailsComponent implements OnInit {
           debugger;
           this.getProductDetailSizes();
           // this.clickSize(this.selectedSize);
-          this.getProductByCategory(this.product.category_id);
+          this.getProductByCategory(this.product.classify_color_id);
           this.getCommentByProductId(this.product.id);
+          this.checkLoad = true;
         },
         error: (error) => {
           debugger;
@@ -160,7 +176,6 @@ export class ProductDetailsComponent implements OnInit {
       this.quantity--;
     }
   }
-
   addToCart() {
     debugger;
     if (this.product) {
@@ -201,6 +216,9 @@ export class ProductDetailsComponent implements OnInit {
           this.soldQuantity.push(product);
         });
       },
+      complete: () => {
+        debugger;
+      },
       error: (error) => {
         debugger;
         console.log(error);
@@ -227,17 +245,17 @@ export class ProductDetailsComponent implements OnInit {
   clickColor(color: string) {
     debugger;
     if (this.selectedColor !== color) {
-      this.productCheckColor.find((product) => product.color.code === color)!;
+      this.productCheckColor.find((product) => product.code_color === color)!;
       this.colors = [];
       this.getProductDetails(
-        this.productCheckColor.find((product) => product.color.code === color)!
+        this.productCheckColor.find((product) => product.code_color === color)!
           .id
       );
-      this.selectedColor = this.product.color.code;
+      this.selectedColor = this.product.code_color;
     }
   }
   getProductByCategory(categoryId: number) {
-    this.productService.getProductByCategoryId(categoryId).subscribe({
+    this.productService.getProductByClassifyColorId(categoryId).subscribe({
       next: (response: any) => {
         this.productCheckColor = response.productResponses;
         debugger;
@@ -256,9 +274,10 @@ export class ProductDetailsComponent implements OnInit {
     debugger;
     this.productCheckColor.forEach((product: Product) => {
       if (product) {
-        this.colors.push(product.color);
+        this.colors.push(product.code_color);
       }
     });
+    this.selectedColor = this.product.code_color;
   }
   getProductDetailSizes() {
     debugger;
@@ -282,33 +301,55 @@ export class ProductDetailsComponent implements OnInit {
   }
   checkInforProduct(infor: string) {
     const element1 = document.getElementById('des');
-    const element2 = document.getElementById('review');
+    const element2 = document.getElementById('review')!;
     const element3 = document.getElementById('infor');
+
+    const li_des = document.getElementById('li-des');
+    const li_review = document.getElementById('li-review');
 
     if (infor === 'des') {
       this.checkInfor = 'des';
-      element1?.classList.add('activeInfor');
-      element2?.classList.remove('activeInfor');
-      element3?.classList.remove('activeInfor');
+      element2.style.display = 'none';
+      li_review?.attributes.removeNamedItem('class');
+      li_review?.setAttribute(
+        'class',
+        'text-gray-500 font-semibold text-sm hover:bg-gray-100 py-3 px-8 cursor-pointer transition-all'
+      );
+      li_des?.setAttribute(
+        'class',
+        'text-gray-800 font-semibold text-sm bg-gray-100 py-3 px-8 border-b-2 border-gray-800 cursor-pointer transition-all'
+      );
     }
     if (infor === 'review') {
       this.checkInfor = 'review';
-      element2?.classList.add('activeInfor');
-      element1?.classList.remove('activeInfor');
-      element3?.classList.remove('activeInfor');
+      element2.style.display = 'block';
+      li_des?.attributes.removeNamedItem('class');
+      li_des?.setAttribute(
+        'class',
+        'text-gray-500 font-semibold text-sm hover:bg-gray-100 py-3 px-8 cursor-pointer transition-all'
+      );
+      li_review?.setAttribute(
+        'class',
+        'text-gray-800 font-semibold text-sm bg-gray-100 py-3 px-8 border-b-2 border-gray-800 cursor-pointer transition-all'
+      );
     }
     if (infor === 'information') {
       this.checkInfor = 'information';
-      element3?.classList.add('activeInfor');
-      element1?.classList.remove('activeInfor');
-      element2?.classList.remove('activeInfor');
     }
   }
   getCommentByProductId(productId: number) {
     debugger;
+    this.checkLoad = false;
     this.productService.getCommentByProductId(productId).subscribe({
       next: (response: any) => {
+        debugger;
+        response.forEach((comment: Comment) => {
+          comment.images.forEach((image: CommentImage) => {
+            image.imageUrl = `${environtment.apiBaseUrl}/comments/viewImages/${image.imageUrl}`;
+          });
+        });
         this.comments = response;
+        this.checkLoad = true;
       },
       complete: () => {
         debugger;
@@ -316,6 +357,93 @@ export class ProductDetailsComponent implements OnInit {
       error: (response) => {
         debugger;
         console.log(response);
+      },
+    });
+  }
+
+  checkLoader(): boolean {
+    if (this.product && this.selectedSize) {
+      return true;
+    }
+    return false;
+  }
+  buyNow() {
+    debugger;
+    if (this.product) {
+      this.cartService.addToCart(
+        this.productId,
+        this.quantity,
+        this.selectedSize
+      );
+      this.route.navigate(['/cart']);
+    } else {
+      console.log('Cannot add cart because product is not available');
+    }
+  }
+  getStartoAddComment(star: number) {
+    this.commentRating = star;
+  }
+  onFileSelected(event: any) {
+    const input = event.target as HTMLInputElement;
+    const fileNamesDiv = document.getElementById('fileNames');
+    if (input.files && fileNamesDiv) {
+      const files = input.files;
+      const fileNames = [];
+      for (let i = 0; i < files.length; i++) {
+        fileNames.push(files[i].name);
+      }
+      fileNamesDiv.innerHTML = fileNames.join('<br>');
+    }
+    const files = event.target.files;
+    this.commentImages = []; // Giả sử commentImages là một mảng để lưu trữ nhiều hình ảnh
+    Array.from(files).forEach((file: unknown) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file as File);
+      reader.onload = () => {
+        // Thêm mỗi hình ảnh đã được đọc vào mảng commentImages
+        this.commentImages.push(file as File);
+      };
+    });
+  }
+  addComment() {
+    let commentDto = new CommentDTO({
+      content: this.commentContent,
+      product_id: this.product.id,
+      user_id: this.user_id,
+      rating: this.commentRating,
+    });
+    this.commentService.createComment(commentDto).subscribe({
+      next: (response: any) => {
+        debugger;
+        console.log('Create comment response:', response);
+        let commentId = response.id;
+        this.commentService
+          .uploadImageCommment(commentId, this.commentImages)
+          .subscribe({
+            next: (response: any) => {
+              debugger;
+              console.log('Upload image response:', response);
+              alert('Comment success');
+              this.checkLoad = true;
+            },
+            complete: () => {
+              this.commentImages = [];
+              this.commentContent = '';
+              this.commentRating = 0;
+              this.getCommentByProductId(this.product.id);
+            },
+            error: (error) => {
+              debugger;
+              console.error('Upload image error:', error);
+            },
+          });
+      },
+      complete: () => {
+        debugger;
+      },
+      error: (error) => {
+        debugger;
+        console.error('Create comment error:', error);
       },
     });
   }

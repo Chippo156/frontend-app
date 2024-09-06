@@ -12,9 +12,10 @@ export interface Product {
   url: string;
   description: string;
   created_at: Date;
+  classify_color_id: number;
   category_id: number;
   product_images: ProductImage[];
   product_sale: Sale;
-  color: Color;
+  code_color: string;
   product_sizes: Size[];
 }

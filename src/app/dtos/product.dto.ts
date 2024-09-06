@@ -1,9 +1,12 @@
+import { Color } from '../models/colors';
+import { Size } from '../models/sizes';
+
 export class ProductDTO {
   product_name: string;
   price: number;
   thumbnail: string;
   description: string;
-  size: string;
+  size: Size;
   color: string;
   category_id: number;
   sale_id: number;

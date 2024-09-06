@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../models/product';
 import { Router } from '@angular/router';
+import { ProductDTO } from '../dtos/product.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -43,11 +44,17 @@ export class ProductService {
       params,
     });
   }
-  getProductByCategoryId(categoryId: number): Observable<any> {
-    const params = new HttpParams().set('categoryId', categoryId.toString());
-    return this.http.get<Product[]>(`${this.apiGetProducts}/by-category`, {
-      params,
-    });
+  getProductByClassifyColorId(classify_color: number): Observable<any> {
+    const params = new HttpParams().set(
+      'classify_color_id',
+      classify_color.toString()
+    );
+    return this.http.get<Product[]>(
+      `${this.apiGetProducts}/by-classify_color`,
+      {
+        params,
+      }
+    );
   }
   getProductByCategoryName(categoryName: string): Observable<any> {
     const params = new HttpParams().set('categoryName', categoryName);
@@ -66,5 +73,29 @@ export class ProductService {
   }
   getCommentByProductId(id: number): Observable<any> {
     return this.http.get(`${this.apiGetProducts}/comments/${id}`);
+  }
+  updateProduct(productId: number, product: Product): Observable<any> {
+    debugger;
+    const productDto: ProductDTO = {
+      product_name: product.name,
+      price: product.price,
+      thumbnail: product.thumbnail,
+      description: product.description,
+      size: product.product_sizes[0],
+      color: product.code_color,
+      category_id: product.category_id,
+      sale_id: product.product_sale.id,
+    };
+    return this.http.put(`${this.apiGetProducts}/${productId}`, productDto);
+  }
+  uploadImageProduct(productId: number, files: File[]): Observable<any> {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+    return this.http.post(
+      `${this.apiGetProducts}/uploadImages/${productId}`,
+      formData
+    );
   }
 }
